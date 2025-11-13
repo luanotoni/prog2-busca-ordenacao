@@ -1,5 +1,6 @@
 
 import pickle
+import time
 
 ''' Funcao de Leitura de Arquivos '''
 def ler_dados(arquivo):
@@ -36,17 +37,20 @@ def criar_lista_atividades(alunos):
     return l
 
 ''' Funcao de Calculo'''
-def calcular_pontos_aluno(matricula,alunos,pontos,qtd_tipos):
+def calcular_pontos_aluno(matricula, alunos, pontos, qtd_tipos):
     atividades = alunos[matricula][1]
-
+    total = 0
     pontos_tipo = [0] * (qtd_tipos + 1)
+
     for tipo,codigo,unidades in atividades:
         pontos_unidade = pontos[(tipo,codigo)][1]
-        pontos_atividade = unidades*pontos_unidade
-        pontos_tipo[tipo] += pontos_atividade
+        pontos_tipo[tipo] += unidades * pontos_unidade
 
-    total = sum(min(pts,10) for pts in pontos_tipo[1:])
-    return min(total,15)
+    for i in range(1, len(pontos_tipo)):
+        if pontos_tipo[i] > 10: pontos_tipo[i] = 10
+        total += pontos_tipo[i]
+
+    return 15 if total > 15 else total
 
 def quick_sort(lista,alunos,pontos,qtd_tipos):
     if len(lista) <= 1:
@@ -79,6 +83,14 @@ def comparar(tupla1,tupla2,alunos,pontos,qtd_tipos):
     mat1, ind1 = tupla1
     mat2, ind2 = tupla2
 
+    if mat1 == mat2:
+        tipo1, cod1, _ = alunos[mat1][1][ind1]
+        tipo2, cod2, _ = alunos[mat2][1][ind2]
+
+        if tipo1 != tipo2:
+            return -1 if tipo1 < tipo2 else 1
+        return -1 if cod1 < cod2 else (1 if cod1 > cod2 else 0)
+
     pts1 = calcular_pontos_aluno(mat1, alunos, pontos, qtd_tipos)
     pts2 = calcular_pontos_aluno(mat2, alunos, pontos, qtd_tipos)
 
@@ -103,10 +115,10 @@ def comparar(tupla1,tupla2,alunos,pontos,qtd_tipos):
     if tipo1 != tipo2:
         return -1 if tipo1 < tipo2 else 1
     
-    if cod1 != cod2:
-        return -1 if cod1 < cod2 else 1
-    
-    return 0
+    # if cod1 != cod2:
+    #     return -1 if cod1 < cod2 else 1
+
+    return -1 if cod1 < cod2 else (1 if cod1 > cod2 else 0)
 
 
 ''' ============ Merge Sort ================== '''
@@ -144,6 +156,7 @@ def merge_sort(lista, alunos, pontos, qtd_tipos):
 ''' ============ Funcao Principal ============ '''
 def main():
 
+    t1 = time.process_time()
     tipos,pontos,alunos  = ler_dados("entrada4.bin")
     
     qtd_tipos = len(tipos)
@@ -152,5 +165,8 @@ def main():
     lista_ordenada = merge_sort(lista, alunos, pontos, qtd_tipos)
 
     gerar_saida(lista_ordenada, alunos, pontos, qtd_tipos, 'saida4.txt')
+    t2 = time.process_time()
+
+    print(t2 - t1)
 
 main()
