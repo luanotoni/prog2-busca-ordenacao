@@ -1,6 +1,5 @@
 
 import pickle
-import time
 
 ''' Funcao de Leitura de Arquivos '''
 def ler_dados(arquivo):
